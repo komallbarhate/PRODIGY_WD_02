@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f9f9f8;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem 2rem;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    #clock-ring {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 2rem;
+    }
+
+    #ring-svg {
+      width: 220px;
+      height: 220px;
+      transform: rotate(-90deg);
+    }
+
+    #ring-bg {
+      fill: none;
+      stroke: #e5e5e3;
+      stroke-width: 4;
+    }
+
+    #ring-arc {
+      fill: none;
+      stroke: #1a1a1a;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 628;
+      stroke-dashoffset: 628;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+
+    #clock-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    #time-display {
+      font-family: 'Courier New', monospace;
+      font-size: 38px;
+      font-weight: 400;
+      letter-spacing: -1px;
+      color: #1a1a1a;
+      line-height: 1;
+    }
+
+    #ms-display {
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    #state-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: #bbb;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+
+    .ctrl-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #1a1a1a;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .ctrl-btn:hover { background: #f3f3f1; }
+    .ctrl-btn:active { transform: scale(0.95); }
+    .ctrl-btn:disabled { opacity: 0.35; cursor: default; }
+    .ctrl-btn:disabled:hover { background: #fff; }
+    .ctrl-btn:disabled:active { transform: none; }
+
+    .ctrl-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: #1a1a1a;
+    }
+
+    .main-btn {
+      width: 80px;
+      height: 80px;
+      border: 1px solid #1a1a1a;
+      background: #1a1a1a;
+      color: #fff;
+    }
+
+    .main-btn:hover { background: #333; }
+    .main-btn svg { fill: #fff; }
+
+    #laps-section { width: 100%; display: none; }
+
+    .laps-header {
+      display: grid;
+      grid-template-columns: 40px 1fr 1fr 60px;
+      gap: 8px;
+      padding: 0 4px 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: #bbb;
+      text-transform: uppercase;
+    }
+
+    #lap-list { list-style: none; }
+
+    #lap-list li {
+      display: grid;
+      grid-template-columns: 40px 1fr 1fr 60px;
+      gap: 8px;
+      padding: 10px 4px;
+      border-bottom: 1px solid #f0f0ee;
+      font-size: 13px;
+      align-items: center;
+    }
+
+    .ln { color: #bbb; font-size: 12px; }
+    .lt { font-family: 'Courier New', monospace; color: #1a1a1a; }
+    .ld { font-family: 'Courier New', monospace; font-size: 12px; color: #888; }
+
+    .tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .tag-best { background: #eaf3de; color: #3b6d11; }
+    .tag-slow { background: #fcebeb; color: #a32d2d; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #141414; color: #f0f0ee; }
+      #time-display { color: #f0f0ee; }
+      #ring-bg { stroke: #2a2a2a; }
+      #ring-arc { stroke: #f0f0ee; }
+      .ctrl-btn { background: #1e1e1e; border-color: #333; color: #f0f0ee; }
+      .ctrl-btn svg { fill: #f0f0ee; }
+      .ctrl-btn:hover { background: #2a2a2a; }
+      .ctrl-btn:disabled:hover { background: #1e1e1e; }
+      .main-btn { background: #f0f0ee; border-color: #f0f0ee; color: #141414; }
+      .main-btn:hover { background: #d8d8d6; }
+      .main-btn svg { fill: #141414; }
+      .laps-header { border-color: #2a2a2a; color: #555; }
+      #lap-list li { border-color: #1e1e1e; }
+      .lt { color: #f0f0ee; }
+      .tag-best { background: #173404; color: #97c459; }
+      .tag-slow { background: #501313; color: #f09595; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="clock-ring">
+      <svg id="ring-svg" viewBox="0 0 220 220">
+        <circle id="ring-bg" cx="110" cy="110" r="100"/>
+        <circle id="ring-arc" cx="110" cy="110" r="100"/>
+      </svg>
+      <div id="clock-inner">
+        <div id="time-display">00:00</div>
+        <div id="ms-display">.00</div>
+        <div id="state-label">ready</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="btn-lap" disabled title="Lap">
+        <svg viewBox="0 0 24 24"><path d="M17 12a5 5 0 1 1-5-5v5h5z"/><path d="M12 2a10 10 0 1 0 10 10h-2a8 8 0 1 1-8-8V2z"/></svg>
+        <span style="font-size:11px">Lap</span>
+      </button>
+      <button class="ctrl-btn main-btn" id="btn-start">
+        <svg id="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="ico-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="ctrl-btn" id="btn-reset" disabled title="Reset">
+        <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+        <span style="font-size:11px">Reset</span>
+      </button>
+    </div>
+
+    <div id="laps-section">
+      <div class="laps-header">
+        <span>#</span><span>Split</span><span>Overall</span><span></span>
+      </div>
+      <ul id="lap-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    let running = false, elapsed = 0, startTime = 0, raf = null;
+    let lapStart = 0, lapTimes = [], lapOveralls = [];
+
+    const tDisp = document.getElementById('time-display');
+    const msDisp = document.getElementById('ms-display');
+    const stateLabel = document.getElementById('state-label');
+    const arc = document.getElementById('ring-arc');
+    const btnStart = document.getElementById('btn-start');
+    const btnLap = document.getElementById('btn-lap');
+    const btnReset = document.getElementById('btn-reset');
+    const lapSection = document.getElementById('laps-section');
+    const lapList = document.getElementById('lap-list');
+    const icoPlay = document.getElementById('ico-play');
+    const icoPause = document.getElementById('ico-pause');
+    const CIRC = 2 * Math.PI * 100;
+
+    function fmt(ms) {
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      const cs = Math.floor((ms % 1000) / 10);
+      const main = h > 0
+        ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+        : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      return { main, ms: String(cs).padStart(2,'0') };
+    }
+
+    function tick() {
+      elapsed = Date.now() - startTime;
+      const f = fmt(elapsed);
+      tDisp.textContent = f.main;
+      msDisp.textContent = '.' + f.ms;
+      const pct = (elapsed % 60000) / 60000;
+      arc.style.strokeDashoffset = CIRC * (1 - pct);
+      raf = requestAnimationFrame(tick);
+    }
+
+    btnStart.addEventListener('click', () => {
+      if (!running) {
+        startTime = Date.now() - elapsed;
+        if (lapTimes.length === 0) lapStart = startTime;
+        running = true;
+        icoPlay.style.display = 'none';
+        icoPause.style.display = '';
+        stateLabel.textContent = 'running';
+        btnLap.disabled = false;
+        btnReset.disabled = false;
+        raf = requestAnimationFrame(tick);
+      } else {
+        running = false;
+        cancelAnimationFrame(raf);
+        icoPlay.style.display = '';
+        icoPause.style.display = 'none';
+        stateLabel.textContent = 'paused';
+        btnLap.disabled = true;
+      }
+    });
+
+    btnLap.addEventListener('click', () => {
+      if (!running) return;
+      const now = Date.now();
+      const split = now - lapStart;
+      lapStart = now;
+      lapTimes.push(split);
+      lapOveralls.push(elapsed);
+      renderLaps();
+      lapSection.style.display = 'block';
+    });
+
+    btnReset.addEventListener('click', () => {
+      cancelAnimationFrame(raf);
+      running = false; elapsed = 0; lapTimes = []; lapOveralls = [];
+      tDisp.textContent = '00:00';
+      msDisp.textContent = '.00';
+      stateLabel.textContent = 'ready';
+      arc.style.strokeDashoffset = CIRC;
+      icoPlay.style.display = '';
+      icoPause.style.display = 'none';
+      btnLap.disabled = true;
+      btnReset.disabled = true;
+      lapList.innerHTML = '';
+      lapSection.style.display = 'none';
+    });
+
+    function renderLaps() {
+      if (lapTimes.length === 0) return;
+      const mn = Math.min(...lapTimes);
+      const mx = Math.max(...lapTimes);
+      lapList.innerHTML = '';
+      for (let i = lapTimes.length - 1; i >= 0; i--) {
+        const t = lapTimes[i];
+        const sf = fmt(t), of = fmt(lapOveralls[i]);
+        const isB = lapTimes.length > 1 && t === mn;
+        const isW = lapTimes.length > 1 && t === mx;
+        const tag = isB
+          ? `<span class="tag tag-best">best</span>`
+          : isW ? `<span class="tag tag-slow">slow</span>` : '';
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="ln">${i + 1}</span>
+          <span class="lt">${sf.main}<span style="color:#bbb;font-size:11px">.${sf.ms}</span></span>
+          <span class="ld">${of.main}.${of.ms}</span>
+          <span>${tag}</span>`;
+        lapList.appendChild(li);
+      }
+    }
+
+    arc.style.strokeDashoffset = CIRC;
+  </script>
+</body>
+</html>
