@@ -4,8 +4,7 @@ A clean, minimal stopwatch web application built with HTML, CSS, and JavaScript 
 
 ## Live Demo
 
-[View Live →](https://yourusername.github.io/stopwatch-app)
-> Replace `yourusername` with your GitHub username after deploying.
+[View Live →](https://komallbarhate.github.io/stopwatch-app)
 
 ---
 
@@ -38,7 +37,7 @@ A clean, minimal stopwatch web application built with HTML, CSS, and JavaScript 
 ### Option 2 — Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/stopwatch-app.git
+git clone https://github.com/komallbarhatee/stopwatch-app.git
 cd stopwatch-app
 open index.html
 ```
