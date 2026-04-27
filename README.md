@@ -40,7 +40,7 @@ A clean, minimal stopwatch web application built with HTML, CSS, and JavaScript 
 ### Option 2 — Clone the repository
 
 ```bash
-git clone https://github.com/komallbarhatee/stopwatch-app.git
+git clone https://github.com/komallbarhate/stopwatch-app.git
 cd stopwatch-app
 open index.html
 ```
