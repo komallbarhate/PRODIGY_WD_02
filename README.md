@@ -24,6 +24,9 @@ A clean, minimal stopwatch web application built with HTML, CSS, and JavaScript 
 | Running | Laps Recorded |
 |--------|---------------|
 | Timer running with animated ring | Lap table with best/slow highlights |
+<img width="563" height="507" alt="task 2 " src="https://github.com/user-attachments/assets/a8237dff-508e-446d-9c76-1eeed76b8ea8" />
+<img width="793" height="612" alt="task 2 1" src="https://github.com/user-attachments/assets/b41cdca5-fedf-4f3b-8040-1dd3721bc18e" />
+
 
 ---
 
