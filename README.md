@@ -4,7 +4,7 @@ A clean, minimal stopwatch web application built with HTML, CSS, and JavaScript 
 
 ## Live Demo
 
-[View Live →](https://komallbarhate.github.io/stopwatch-app)
+[View Live →](https://komallbarhate.github.io/PRODIGY_WD_02/)
 
 ---
 
